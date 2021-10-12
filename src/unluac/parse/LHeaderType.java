@@ -415,10 +415,16 @@ class LHeaderType53 extends LHeaderType {
   
   @Override
   protected void parse_main(ByteBuffer buffer, BHeader header, LHeaderParseState s) {
-    parse_format(buffer, header, s);
+    // parse_format(buffer, header, s); //@terran
+    buffer.get();
+    s.format = 0;
+
     parse_tail(buffer, header, s);
     parse_int_size(buffer, header, s);
-    parse_size_t_size(buffer, header, s);
+    
+    // parse_size_t_size(buffer, header, s);//@terran
+    s.sizeT = new BIntegerType50(4);
+
     parse_instruction_size(buffer, header, s);
     parse_integer_size(buffer, header, s);
     parse_float_size(buffer, header, s);

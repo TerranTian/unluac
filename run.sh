@@ -16,7 +16,7 @@ function build(){
     jar -cvmf build/MANIFEST.MF unluac.jar -C build/classes .;
 
 
-    java -jar unluac.jar
+    java -jar unluac.jar test.xluac > test.lua
 }
 
 if test $# -lt 1; then error_exit "wrong arguments"; fi;
