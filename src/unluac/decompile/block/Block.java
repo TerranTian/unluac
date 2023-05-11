@@ -3,6 +3,7 @@ package unluac.decompile.block;
 import java.util.Arrays;
 import java.util.List;
 
+import unluac.decompile.CloseType;
 import unluac.decompile.Decompiler;
 import unluac.decompile.Registers;
 import unluac.decompile.operation.Operation;
@@ -14,6 +15,7 @@ abstract public class Block extends Statement implements Comparable<Block> {
   protected final LFunction function;
   public int begin;
   public int end;
+  public int closeRegister;
   private final int priority;
   public boolean loopRedirectAdjustment = false;
   protected boolean scopeUsed = false;
@@ -22,6 +24,7 @@ abstract public class Block extends Statement implements Comparable<Block> {
     this.function = function;
     this.begin = begin;
     this.end = end;
+    this.closeRegister = -1;
     this.priority = priority;
   }
   
@@ -43,6 +46,18 @@ abstract public class Block extends Statement implements Comparable<Block> {
   
   public void useScope() {
     scopeUsed = true;
+  }
+  
+  public boolean hasCloseLine() {
+    return false;
+  }
+  
+  public int getCloseLine() {
+    throw new IllegalStateException();
+  }
+  
+  public void useClose() {
+    throw new IllegalStateException();
   }
   
   /**
@@ -80,7 +95,7 @@ abstract public class Block extends Statement implements Comparable<Block> {
     return false;
   }
   
-  public Block[] split(int line) {
+  public Block[] split(int line, CloseType closeType) {
     throw new IllegalStateException();
   }
   

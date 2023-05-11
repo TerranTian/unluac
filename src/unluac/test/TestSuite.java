@@ -3,6 +3,7 @@ package unluac.test;
 import java.io.File;
 import java.io.IOException;
 
+import unluac.Configuration;
 import unluac.Main;
 import unluac.assemble.AssemblerException;
 
@@ -15,10 +16,10 @@ public class TestSuite {
   
   private String name;
   private String path;
-  private String[] files;
+  private TestFile[] files;
   private String ext = ".lua";
   
-  public TestSuite(String name, String path, String[] files) {
+  public TestSuite(String name, String path, TestFile[] files) {
     this.name = name;
     this.path = path;
     this.files = files;
@@ -32,14 +33,14 @@ public class TestSuite {
     }
   }
   
-  private TestResult test(LuaSpec spec, UnluacSpec uspec, String file) {
+  private TestResult test(LuaSpec spec, UnluacSpec uspec, String file, Configuration config) {
     try {
       LuaC.compile(spec, file, working_dir + compiled);
     } catch (IOException e) {
       return TestResult.SKIPPED;
     }
     try {
-      uspec.run(working_dir + compiled, working_dir + decompiled);
+      uspec.run(working_dir + compiled, working_dir + decompiled, config);
       if(!uspec.disassemble) {
         LuaC.compile(spec, working_dir + decompiled, working_dir + recompiled);
       } else {
@@ -63,9 +64,9 @@ public class TestSuite {
     }
   }
   
-  private TestResult testc(LuaSpec spec, UnluacSpec uspec, String file) {
+  private TestResult testc(LuaSpec spec, UnluacSpec uspec, String file, Configuration config) {
     try {
-      uspec.run(file, working_dir + decompiled);
+      uspec.run(file, working_dir + decompiled, config);
       LuaC.compile(spec, working_dir + decompiled, working_dir + recompiled);
       Compare compare = new Compare(Compare.Mode.NORMAL);
       return compare.bytecode_equal(file, working_dir + recompiled) ? TestResult.OK : TestResult.FAILED;
@@ -77,15 +78,17 @@ public class TestSuite {
     }
   }
   
-  public boolean run(LuaSpec spec, UnluacSpec uspec, TestReport report) throws IOException {
+  public boolean run(LuaSpec spec, UnluacSpec uspec, TestReport report, Configuration base) throws IOException {
     int failed = 0;
     File working = new File(working_dir);
     if(!working.exists()) {
       working.mkdir();
     }
-    for(String name : files) {
+    for(TestFile testfile : files) {
+      String name = testfile.name;
       if(spec.compatible(name)) {
-        TestResult result = test(spec, uspec, path + name + ext);
+        Configuration config = configure(testfile, base);
+        TestResult result = test(spec, uspec, path + name + ext, config);
         report.result(testName(spec, name), result);
         switch(result) {
           case OK:
@@ -103,7 +106,7 @@ public class TestSuite {
     return failed == 0;
   }
   
-  public boolean run(LuaSpec spec, UnluacSpec uspec, String file, boolean compiled) throws IOException {
+  public boolean run(LuaSpec spec, UnluacSpec uspec, String file, boolean compiled, Configuration config) throws IOException {
     int passed = 0;
     int skipped = 0;
     int failed = 0;
@@ -121,9 +124,9 @@ public class TestSuite {
       }
       TestResult result;
       if(!compiled) {
-        result = test(spec, uspec, full);
+        result = test(spec, uspec, full, config);
       } else {
-        result = testc(spec, uspec, full);
+        result = testc(spec, uspec, full, config);
       }
       switch(result) {
         case OK:
@@ -146,4 +149,18 @@ public class TestSuite {
     }
     return failed == 0;
   }
+  
+  private Configuration configure(TestFile testfile, Configuration config) {
+    Configuration modified = null;
+    if(testfile.getFlag(TestFile.RELAXED_SCOPE) && config.strict_scope) {
+      modified = extend(config, modified);
+      modified.strict_scope = false;
+    }
+    return modified != null ? modified : config;
+  }
+  
+  private Configuration extend(Configuration base, Configuration modified) {
+    return modified != null ? modified : new Configuration(base);
+  }
+  
 }

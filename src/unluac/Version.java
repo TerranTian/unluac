@@ -94,11 +94,19 @@ public class Version {
     BOTTOM_CONDITION,
   }
   
+  public static enum CloseSemantics {
+    DEFAULT,
+    JUMP,
+    LUA54,
+  }
+  
   public final Setting<VarArgType> varargtype;
   public final Setting<Boolean> useupvaluecountinheader;
   public final Setting<InstructionFormat> instructionformat;
   public final Setting<Integer> outerblockscopeadjustment;
+  public final Setting<Boolean> extendedrepeatscope;
   public final Setting<Boolean> closeinscope;
+  public final Setting<CloseSemantics> closesemantics;
   public final Setting<UpvalueDeclarationType> upvaluedeclarationtype;
   public final Setting<Op> fortarget;
   public final Setting<Op> tfortarget;
@@ -146,7 +154,9 @@ public class Version {
           defaultop = Op.DEFAULT;
           instructionformat = new Setting<>(InstructionFormat.LUA50);
           outerblockscopeadjustment = new Setting<>(-1);
+          extendedrepeatscope = new Setting<Boolean>(true);
           closeinscope = new Setting<Boolean>(true);
+          closesemantics = new Setting<CloseSemantics>(CloseSemantics.DEFAULT);
           upvaluedeclarationtype = new Setting<>(UpvalueDeclarationType.INLINE);
           fortarget = new Setting<>(Op.FORLOOP);
           tfortarget = new Setting<>(null);
@@ -170,7 +180,9 @@ public class Version {
           defaultop = Op.DEFAULT;
           instructionformat = new Setting<>(InstructionFormat.LUA51);
           outerblockscopeadjustment = new Setting<>(-1);
+          extendedrepeatscope = new Setting<Boolean>(false);
           closeinscope = new Setting<Boolean>(true);
+          closesemantics = new Setting<CloseSemantics>(CloseSemantics.DEFAULT);
           upvaluedeclarationtype = new Setting<>(UpvalueDeclarationType.INLINE);
           fortarget = new Setting<>(null);
           tfortarget = new Setting<>(Op.TFORLOOP);
@@ -194,7 +206,9 @@ public class Version {
           defaultop = Op.DEFAULT;
           instructionformat = new Setting<>(InstructionFormat.LUA51);
           outerblockscopeadjustment = new Setting<>(0);
+          extendedrepeatscope = new Setting<Boolean>(false);
           closeinscope = new Setting<Boolean>(null);
+          closesemantics = new Setting<CloseSemantics>(CloseSemantics.JUMP);
           upvaluedeclarationtype = new Setting<>(UpvalueDeclarationType.HEADER);
           fortarget = new Setting<>(null);
           tfortarget = new Setting<>(Op.TFORCALL);
@@ -218,7 +232,9 @@ public class Version {
           defaultop = Op.DEFAULT;
           instructionformat = new Setting<>(InstructionFormat.LUA51);
           outerblockscopeadjustment = new Setting<>(0);
+          extendedrepeatscope = new Setting<Boolean>(false);
           closeinscope = new Setting<Boolean>(null);
+          closesemantics = new Setting<CloseSemantics>(CloseSemantics.JUMP);
           upvaluedeclarationtype = new Setting<>(UpvalueDeclarationType.HEADER);
           fortarget = new Setting<>(null);
           tfortarget = new Setting<>(Op.TFORCALL);
@@ -242,7 +258,9 @@ public class Version {
           defaultop = Op.DEFAULT54;
           instructionformat = new Setting<>(InstructionFormat.LUA54);
           outerblockscopeadjustment = new Setting<>(0);
+          extendedrepeatscope = new Setting<Boolean>(false);
           closeinscope = new Setting<Boolean>(false);
+          closesemantics = new Setting<CloseSemantics>(CloseSemantics.LUA54);
           upvaluedeclarationtype = new Setting<>(UpvalueDeclarationType.HEADER);
           fortarget = new Setting<>(null);
           tfortarget = new Setting<>(null);

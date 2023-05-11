@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import unluac.Version;
 import unluac.decompile.expression.ConstantExpression;
 import unluac.decompile.expression.Expression;
 import unluac.decompile.expression.LocalVariable;
@@ -65,10 +66,15 @@ public class Registers {
     Declaration decl = decls[register][line];
     return decl != null && decl.begin == line && !decl.forLoop && !decl.forLoopExplicit;
   }
-    
+  
   public List<Declaration> getNewLocals(int line) {
-    ArrayList<Declaration> locals = new ArrayList<Declaration>(registers);
-    for(int register = 0; register < registers; register++) {
+    return getNewLocals(line, 0);
+  }
+  
+  public List<Declaration> getNewLocals(int line, int first) {
+    first = Math.max(0, first);
+    ArrayList<Declaration> locals = new ArrayList<Declaration>(Math.max(registers - first, 0));
+    for(int register = first; register < registers; register++) {
       if(isNewLocal(register, line)) {
         locals.add(getDeclaration(register, line));
       }
@@ -189,6 +195,10 @@ public class Registers {
     for(int line = begin; line <= end; line++) {
       decls[register][line] = decl;
     }
+  }
+  
+  public Version getVersion() {
+    return f.getVersion();
   }
   
 }

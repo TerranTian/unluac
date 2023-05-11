@@ -1,10 +1,8 @@
 package unluac;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -22,10 +20,11 @@ import unluac.decompile.Output;
 import unluac.decompile.OutputProvider;
 import unluac.parse.BHeader;
 import unluac.parse.LFunction;
+import unluac.util.FileUtils;
 
 public class Main {
 
-  public static String version = "1.2.3.451";
+  public static String version = "1.2.3.491";
   
   public static void main(String[] args) {
     String fn = null;
@@ -78,7 +77,7 @@ public class Main {
         }
         Decompiler d = new Decompiler(lmain);
         Decompiler.State result = d.decompile();
-        d.print(result);
+        d.print(result, config.getOutput());
         break;
       }
       case DISASSEMBLE: {
@@ -89,7 +88,7 @@ public class Main {
           error(e.getMessage(), false);
         }
         Disassembler d = new Disassembler(lmain);
-        d.disassemble(new Output());
+        d.disassemble(config.getOutput());
         break;
       }
       case ASSEMBLE: {
@@ -98,7 +97,7 @@ public class Main {
         } else {
           try {
             Assembler a = new Assembler(
-              new BufferedReader(new FileReader(new File(fn))),
+              FileUtils.createSmartTextFileReader(new File(fn)),
               new FileOutputStream(config.output)
             );
             a.assemble();
@@ -117,7 +116,7 @@ public class Main {
     }
   }
   
-  private static void error(String err, boolean usage) {
+  public static void error(String err, boolean usage) {
     System.err.println("unluac v" + version);
     System.err.print("  error: ");
     System.err.println(err);
@@ -146,8 +145,8 @@ public class Main {
     }
   }
   
-  public static void decompile(String in, String out) throws IOException {
-    LFunction lmain = file_to_function(in, new Configuration());
+  public static void decompile(String in, String out, Configuration config) throws IOException {
+    LFunction lmain = file_to_function(in, config);
     Decompiler d = new Decompiler(lmain);
     Decompiler.State result = d.decompile();
     final PrintStream pout = new PrintStream(out);
@@ -160,7 +159,7 @@ public class Main {
       
       @Override
       public void print(byte b) {
-        pout.print(b);
+        pout.write(b);
       }
 
       @Override
@@ -175,7 +174,7 @@ public class Main {
   
   public static void assemble(String in, String out) throws IOException, AssemblerException {
     OutputStream outstream = new BufferedOutputStream(new FileOutputStream(new File(out)));
-    Assembler a = new Assembler(new BufferedReader(new FileReader(new File(in))), outstream);
+    Assembler a = new Assembler(FileUtils.createSmartTextFileReader(new File(in)), outstream);
     a.assemble();
     outstream.flush();
     outstream.close();

@@ -40,9 +40,12 @@ public class Declaration {
     this.end = end;
   }
   
-  public boolean isSplitBy(int begin, int end) {
-    return (begin <= this.begin && this.begin < end && end <= this.end)
-        || (begin <= this.end && this.end < end - 1 && this.begin < begin);
+  public boolean isSplitBy(int line, int begin, int end) {
+    int scopeEnd = end - 1;
+    return this.begin >= line && this.begin < begin
+      || this.end >= line && this.end < begin
+      || this.begin < begin && this.end >= begin && this.end < scopeEnd
+      || this.begin >= begin && this.begin <= scopeEnd && this.end > scopeEnd;
   }
   
 }
